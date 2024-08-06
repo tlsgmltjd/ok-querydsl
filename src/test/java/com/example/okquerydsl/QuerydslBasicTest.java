@@ -67,6 +67,35 @@ public class QuerydslBasicTest {
         assertThat(foundMember.getUsername()).isEqualTo(username);
     }
 
+    @Test
+    void search() {
+        Member foundMember = queryFactory
+                .selectFrom(member)
+                .where(
+                        member.username.eq("member1")
+                                .and(member.age.between(10, 30))
+                )
+                .fetchOne();
+
+        // eq, ne == (eq().not()), in, notIn, between, goe >=, gt >, loe <=, lt <, like, contains == %v%, startsWith v%
+
+        assertThat(foundMember.getUsername()).isEqualTo("member1");
+    }
+
+    @Test
+    void searchAndParam() {
+        Member foundMember = queryFactory
+                .selectFrom(member)
+                .where(
+                        member.username.eq("member1"),
+                        member.age.between(10, 30)
+                )
+                .fetchOne();
+
+        assertThat(foundMember.getUsername()).isEqualTo("member1");
+    }
+
+
     private void initDb() {
         Team teamA = new Team("teamA");
         Team teamB = new Team("teamB");
