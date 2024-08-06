@@ -1,7 +1,6 @@
 package com.example.okquerydsl;
 
 import com.example.okquerydsl.entity.Hello;
-import com.example.okquerydsl.entity.QHello;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
