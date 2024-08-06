@@ -51,6 +51,13 @@ public class QuerydslBasicTest {
 
         String username = "member1";
 
+        /**
+         * QClass를 사용할때
+         * QMember member = new QMember("m");
+         * 이렇게 직접 생성해서 사용할 수 있다.
+         * 여기서 생성자로 넣은 값은 JPQL로 만들어질때 alias가 된다.
+         */
+
         Member foundMember = queryFactory
                 .select(member)
                 .from(member)
