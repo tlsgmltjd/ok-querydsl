@@ -157,6 +157,33 @@ public class QuerydslBasicTest {
         assertThat(memberNull.getUsername()).isNull();
     }
 
+    @Test
+    void paging() {
+        List<Member> members = queryFactory
+                .selectFrom(member)
+                .orderBy(member.username.desc())
+                .offset(0)
+                .limit(2)
+                .fetch();
+
+        assertThat(members.size()).isEqualTo(2);
+    }
+
+    @Test
+    void paging2() {
+        QueryResults<Member> fetchResults = queryFactory
+                .selectFrom(member)
+                .orderBy(member.username.desc())
+                .offset(0)
+                .limit(2)
+                .fetchResults();
+
+        assertThat(fetchResults.getResults().size()).isEqualTo(2);
+        assertThat(fetchResults.getTotal()).isEqualTo(4);
+        assertThat(fetchResults.getLimit()).isEqualTo(2);
+        assertThat(fetchResults.getOffset()).isEqualTo(0);
+    }
+
     private void initDb() {
         Team teamA = new Team("teamA");
         Team teamB = new Team("teamB");
