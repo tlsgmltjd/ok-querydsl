@@ -129,6 +129,34 @@ public class QuerydslBasicTest {
 
     }
 
+    // 1. 나이 내림차순
+    // 2. 이름 오름차순
+    // 회원이름이 없으면 == null, 마지막에 출력 -> nulls last
+    @Test
+    void sort() {
+
+        em.persist(new Member(null, 100));
+        em.persist(new Member("member5", 100));
+        em.persist(new Member("member6", 100));
+
+        List<Member> members = queryFactory
+                .selectFrom(member)
+                .where(member.age.eq(100))
+                .orderBy(
+                        member.age.desc(),
+                        member.username.asc().nullsLast()
+                )
+                .fetch();
+
+        Member member5 = members.get(0);
+        Member member6 = members.get(1);
+        Member memberNull = members.get(2);
+
+        assertThat(member5.getUsername()).isEqualTo("member5");
+        assertThat(member6.getUsername()).isEqualTo("member6");
+        assertThat(memberNull.getUsername()).isNull();
+    }
+
     private void initDb() {
         Team teamA = new Team("teamA");
         Team teamB = new Team("teamB");
