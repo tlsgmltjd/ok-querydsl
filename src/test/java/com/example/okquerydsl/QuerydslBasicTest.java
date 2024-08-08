@@ -5,10 +5,13 @@ import com.querydsl.core.QueryResults;
 import com.querydsl.core.Tuple;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.PersistenceUnit;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.Commit;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -304,6 +307,37 @@ public class QuerydslBasicTest {
         for (Tuple tuple : result) {
             System.out.println("tuple = " + tuple);
         }
+    }
+
+    @PersistenceUnit
+    EntityManagerFactory emf;
+
+    // 페치조인
+    @Test
+    void fetchJoin() {
+        em.flush();
+        em.clear();
+
+        Member foundMember = queryFactory
+                .selectFrom(QMember.member)
+                .join(member.team, team).fetchJoin()
+                .where(QMember.member.username.eq("member1"))
+                .fetchOne();
+
+        boolean loaded = emf.getPersistenceUnitUtil().isLoaded(foundMember.getTeam());
+//        assertThat(loaded).as("페치조인 미적용").isFalse();
+        assertThat(loaded).as("페치조인 적용").isTrue();
+
+    }
+
+    @Test
+    void tset() {
+        // JPA에서는 join 대상에 서브쿼리를 넣지 못한다.
+        em.createNativeQuery(
+                        "SELECT m.* FROM Member m " +
+                                "INNER JOIN (SELECT m2.member_id FROM Member m2 WHERE m2.username = 'member1') tb " +
+                                "ON m.member_id = tb.member_id", Member.class)
+                .getResultList();
     }
 
     private void initDb() {
