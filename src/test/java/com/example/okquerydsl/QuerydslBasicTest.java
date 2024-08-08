@@ -467,6 +467,38 @@ public class QuerydslBasicTest {
         System.out.println("result = " + result);
     }
 
+    // 중급
+    // 프로젝션: select 절에 조회 대상 지정
+
+    @Test
+    void signleProjection() {
+        List<String> result = queryFactory
+                .select(member.username)
+                .from(member)
+                .fetch();
+
+        for (String s : result) {
+            System.out.println("s = " + s);
+        }
+    }
+
+    @Test
+    void tupleProjection() {
+        // Tuple은 querydsl의 의존임으로 repository 계층 밖으로 나가는것은 좋지 않다.
+        List<Tuple> result = queryFactory
+                .select(member.username, member.age)
+                .from(member)
+                .fetch();
+
+        for (Tuple tuple : result) {
+            String username = tuple.get(member.username);
+            Integer age = tuple.get(member.age);
+
+            System.out.println("username = " + username);
+            System.out.println("age = " + age);
+        }
+    }
+
     @Test
     void tset() {
         // JPA에서는 join 대상에 서브쿼리를 넣지 못한다.
