@@ -1,8 +1,12 @@
 package com.example.okquerydsl;
 
+import com.example.okquerydsl.dto.MemberDto;
+import com.example.okquerydsl.dto.UserDto;
 import com.example.okquerydsl.entity.*;
 import com.querydsl.core.QueryResults;
 import com.querydsl.core.Tuple;
+import com.querydsl.core.types.ExpressionUtils;
+import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
@@ -496,6 +500,86 @@ public class QuerydslBasicTest {
 
             System.out.println("username = " + username);
             System.out.println("age = " + age);
+        }
+    }
+
+    @Test
+    void findDtoJpql() {
+        // JPQL의 new operation dto projection 조회
+        List<MemberDto> resultList = em.createQuery("select new com.example.okquerydsl.dto.MemberDto(m.username, m.age) from Member m", MemberDto.class)
+                .getResultList();
+    }
+
+    @Test
+    void findDtoBySetter() {
+        List<MemberDto> result = queryFactory
+                .select(
+                        Projections.bean(
+                                MemberDto.class,
+                                member.username,
+                                member.age))
+                .from(member)
+                .fetch();
+
+        for (MemberDto memberDto : result) {
+            System.out.println("memberDto = " + memberDto);
+        }
+    }
+
+    @Test
+    void findDtoByField() {
+        List<MemberDto> result = queryFactory
+                .select(
+                        // 리플렉션을 써서 필드에 값을 꽂아넣는다.
+                        Projections.fields(
+                                MemberDto.class,
+                                member.username,
+                                member.age))
+                .from(member)
+                .fetch();
+
+        for (MemberDto memberDto : result) {
+            System.out.println("memberDto = " + memberDto);
+        }
+    }
+
+    @Test
+    void findDtoByConstructor() {
+        List<MemberDto> result = queryFactory
+                .select(
+                        Projections.constructor(
+                                MemberDto.class,
+                                member.username,
+                                member.age))
+                .from(member)
+                .fetch();
+
+        for (MemberDto memberDto : result) {
+            System.out.println("memberDto = " + memberDto);
+        }
+    }
+
+    @Test
+    void findDtoUserDto() {
+        QMember memberSub = new QMember("memberSub");
+        List<UserDto> result = queryFactory
+                .select(
+                        Projections.fields(
+                                UserDto.class,
+
+                                member.username.as("name"), // fields 프로젝션 방식은 DTO 객체와 필드명이 다를때는 as로 Alias를 줘야함
+//                                ExpressionUtils.as(member.username, "name"),
+
+                                ExpressionUtils.as(
+                                        select(memberSub.age.max())
+                                        .from(memberSub), "age"
+                                ))
+                )
+                .from(member)
+                .fetch();
+
+        for (UserDto userDto : result) {
+            System.out.println("userDto = " + userDto);
         }
     }
 
