@@ -260,6 +260,52 @@ public class QuerydslBasicTest {
                 .containsExactly("teamA", "teamB");
     }
 
+    // on절
+    // 조인 대상 필터링, 연관관계가 없는 엔티티 외부 조인(세타조인의 외부조인)
+
+    // 회원과 팀을 조인, 팀 이름이 teamA인 팀만 조인, 회원은 모두 조회
+    @Test
+    void join_on_filtering() {
+        List<Tuple> result = queryFactory
+                .select(member, team)
+                .from(member)
+                // inner join이면 on절로 필터링 하는것과 Where에서 필터링 하는것과 결과과 동일하다
+                // 외부 조인일 때는 On절의 필터링이 의미가 있음 -> 조인 대상을 줄여서 조인해올 수 있음
+                // 내부조인이면 가급적 익숙한 where절을 활용해서 조인을 하자
+                .leftJoin(member.team, team).on(team.name.eq("teamA"))
+                .fetch();
+
+        for (Tuple tuple : result) {
+            System.out.println("tuple = " + tuple);
+        }
+
+        // member left outer join team and team.name = teamA
+        // tuple = [Member(id=1, username=member1, age=10), Team(id=1, name=teamA)]
+        // tuple = [Member(id=2, username=member2, age=10), Team(id=1, name=teamA)]
+        // tuple = [Member(id=3, username=member3, age=10), null]
+        // tuple = [Member(id=4, username=member4, age=10), null]
+    }
+
+    // 연관관계가 없는 엔티티 외부조인
+    // 회원의 이름이 팀 이름과 같은 대상 외부조인
+    @Test
+    void join_on_no_relation() {
+        em.persist(new Member("teamA"));
+        em.persist(new Member("teamB"));
+        em.persist(new Member("teamC"));
+
+        List<Tuple> result = queryFactory
+                .select(member, team)
+                .from(member)
+                // .leftJoin(member.team, team) <- 기존 방식
+                .leftJoin(team).on(member.username.eq(team.name))
+                .fetch();
+
+        for (Tuple tuple : result) {
+            System.out.println("tuple = " + tuple);
+        }
+    }
+
     private void initDb() {
         Team teamA = new Team("teamA");
         Team teamB = new Team("teamB");
