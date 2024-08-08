@@ -712,6 +712,44 @@ public class QuerydslBasicTest {
         assertThat(count).isEqualTo(4);
     }
 
+    // sql function
+    // 각 디비 dialect에 등록되어있는 함수들을 사용가능하다. (직접 dialect를 상속 받아서 등록해줄수도있다.)
+
+    @Test
+    void sqlFunction() {
+        List<String> result = queryFactory
+                .select(member.username)
+                .from(member)
+//                .where(member.username.eq(
+//                        Expressions.stringTemplate(
+//                                "function('replace', {0}, {1}, {2})",
+//                                member.username, "member", "M")))
+
+                // 일반적인 ansi 표준 함수들은 Querydsl에서 메서드 체이닝으로 지원해준다.
+                // 위와 동일한 작동
+                .where(member.username.eq(member.username.lower()))
+                .fetch();
+
+        for (String s : result) {
+            System.out.println("s = " + s);
+        }
+    }
+
+    @Test
+    void sqlFunction2() {
+        List<String> result = queryFactory
+                .select(
+                        Expressions.stringTemplate(
+                                "function('lower', {0})",
+                                member.username))
+                .from(member)
+                .fetch();
+
+        for (String s : result) {
+            System.out.println("s = " + s);
+        }
+    }
+
     @Test
     void tset() {
         // JPA에서는 join 대상에 서브쿼리를 넣지 못한다.
