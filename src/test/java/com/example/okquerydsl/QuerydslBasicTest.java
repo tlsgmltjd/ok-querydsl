@@ -3,6 +3,7 @@ package com.example.okquerydsl;
 import com.example.okquerydsl.entity.*;
 import com.querydsl.core.QueryResults;
 import com.querydsl.core.Tuple;
+import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
@@ -409,6 +410,37 @@ public class QuerydslBasicTest {
     // JPA의 JPQL은 from 절의 서브쿼리르 지원하지 않는다. -> 인라인뷰
     // -> 서브쿼리를 join으로 변경이 가능하다면 변경한다 -> 쿼리를 2번으로 분리해서 구현한다 -> nativeSQL을 사용해서 구현한다
     // 너무 화면에 맞춘 쿼리를 날리는것은 비효율적인 상황이 많다. 쿼리 재사용성이 떨어짐
+
+    // case
+    @Test
+    void basicCase() {
+        List<String> result = queryFactory
+                .select(member.age
+                        .when(10).then("열살")
+                        .when(100).then("백살")
+                        .otherwise("기타"))
+                .from(member)
+                .fetch();
+
+        for (String s : result) {
+            System.out.println("s = " + s);
+        }
+    }
+
+    @Test
+    void complexCase() {
+        List<String> result = queryFactory
+                .select(new CaseBuilder()
+                        .when(member.age.between(10, 20)).then("10~20살")
+                        .when(member.age.between(21, 150)).then("21~150살")
+                        .otherwise("기타"))
+                .from(member)
+                .fetch();
+
+        for (String s : result) {
+            System.out.println("s = " + s);
+        }
+    }
 
     @Test
     void tset() {
