@@ -672,6 +672,46 @@ public class QuerydslBasicTest {
         return ageCond != null ? member.age.eq(ageCond) : null;
     }
 
+    // 벌크연산
+    // 벌크 연산은 영속성 컨텍스트를 신경쓰지 않고 디비에 직접 쿼리가 날라간다.
+    // 그렇기 때문에 영속성 컨텍스트와 데이터베이스의 상태가 맞지 않는다.
+    // 벌크 연산 이후에는 flush, clear로 영속성 컨텍스트를 비우자
+    @Test
+    void bulkUpdate() {
+        // 영향 받은 row 수
+        long count = queryFactory
+                .update(member)
+                .set(member.username, "비회원")
+                .where(member.age.lt(99))
+                .execute();
+
+        System.out.println("count = " + count);
+
+        em.flush();
+        em.clear();
+    }
+
+    @Test
+    void bulkMath() {
+        long count = queryFactory
+                .update(member)
+                // set A = B
+                .set(member.age, member.age.multiply(100))
+                .execute();
+
+        System.out.println("count = " + count);
+    }
+
+    @Test
+    void bulkDelete() {
+        long count = queryFactory
+                .delete(member)
+                .where(member.age.lt(110))
+                .execute();
+
+        assertThat(count).isEqualTo(4);
+    }
+
     @Test
     void tset() {
         // JPA에서는 join 대상에 서브쿼리를 넣지 못한다.
