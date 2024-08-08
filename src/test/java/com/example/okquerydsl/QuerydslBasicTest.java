@@ -8,7 +8,9 @@ import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.QueryResults;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.ExpressionUtils;
+import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -599,7 +601,7 @@ public class QuerydslBasicTest {
     }
 
     // 동적쿼리
-    // 1. BooleanBuilder
+    // 1. BooleanBuilder 2. BooleanExpression
 
     @Test
     void dynamicQuery_BooleanBuilder() {
@@ -632,6 +634,42 @@ public class QuerydslBasicTest {
                     builder
                 )
                 .fetch();
+    }
+
+    @Test
+    void dynamicQuery_WhereParam() {
+        String usernameParam = "member1";
+        Integer ageParam = null;
+
+        List<Member> result = searchMember2(usernameParam, ageParam);
+        assertThat(result.size()).isEqualTo(1);
+    }
+
+    private List<Member> searchMember2(String usernameCond, Integer ageCond) {
+        return queryFactory
+                .selectFrom(member)
+                .where(
+                        // where 절에 null이 들어가면 조건이 무시됨
+                        allEq(usernameCond, ageCond)
+                )
+                .fetch();
+
+    }
+
+    // 메서드를 다른 쿼리에서 재사용이 가능하다.
+
+    // BooleanExpression - 조립 가능
+    // 비즈니스상의 여러 검색 조건들을 묶어서 컴포지션이 가능하다.
+    private BooleanExpression allEq(String usernameCond, Integer ageCond) {
+        return usernameEq(usernameCond).and(ageEq(ageCond));
+    }
+
+    private BooleanExpression usernameEq(String usernameCond) {
+        return usernameCond != null ? member.username.eq(usernameCond) : null;
+    }
+
+    private BooleanExpression ageEq(Integer ageCond) {
+        return ageCond != null ? member.age.eq(ageCond) : null;
     }
 
     @Test
