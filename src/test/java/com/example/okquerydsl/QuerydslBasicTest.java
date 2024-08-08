@@ -1,6 +1,7 @@
 package com.example.okquerydsl;
 
 import com.example.okquerydsl.dto.MemberDto;
+import com.example.okquerydsl.dto.QMemberDto;
 import com.example.okquerydsl.dto.UserDto;
 import com.example.okquerydsl.entity.*;
 import com.querydsl.core.QueryResults;
@@ -580,6 +581,21 @@ public class QuerydslBasicTest {
 
         for (UserDto userDto : result) {
             System.out.println("userDto = " + userDto);
+        }
+    }
+
+    // @QueryProjection
+    // DTO 객체를 Q-Class로 만들어줘서 생성자 필드에 대한 안정성을 보장해준다.
+    // -> DTO 객체가 QueryDSL에 대한 라이브러리 의존성이 발생한다.
+    @Test
+    void findDtoQueryProjection() {
+        List<MemberDto> result = queryFactory
+                .select(new QMemberDto(member.username, member.age))
+                .from(member)
+                .fetch();
+
+        for (MemberDto memberDto : result) {
+            System.out.println("memberDto = " + memberDto);
         }
     }
 
