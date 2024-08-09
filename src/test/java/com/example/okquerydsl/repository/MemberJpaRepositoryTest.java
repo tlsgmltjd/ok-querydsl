@@ -65,11 +65,12 @@ class MemberJpaRepositoryTest {
 
         // 조건이 없다면 모든 데이터를 긁어올 수도 있어서 주의가 필요함 (기본조건이나 페이징이 걸려있으면 괜찮다)
         MemberSearchCondition condition = new MemberSearchCondition();
-//        condition.setAgeGoe(10);
-//        condition.setAgeLoe(90);
-//        condition.setTeamName("teamB");
+        condition.setAgeGoe(10);
+        condition.setAgeLoe(90);
+        condition.setTeamName("teamB");
 
-        List<MemberTeamDto> result = memberJpaRepository.searchByBuilder(condition);
+//        List<MemberTeamDto> result = memberJpaRepository.searchByBuilder(condition);
+        List<MemberTeamDto> result = memberJpaRepository.search(condition);
         assertThat(result)
                 .extracting("username")
                 .containsExactly("member3", "member4");
