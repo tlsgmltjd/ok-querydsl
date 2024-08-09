@@ -2,19 +2,15 @@ package com.example.okquerydsl.repository;
 
 import com.example.okquerydsl.dto.MemberSearchCondition;
 import com.example.okquerydsl.dto.MemberTeamDto;
-import com.example.okquerydsl.dto.QMemberDto;
 import com.example.okquerydsl.dto.QMemberTeamDto;
 import com.example.okquerydsl.entity.Member;
-import com.example.okquerydsl.entity.QTeam;
 import com.querydsl.core.BooleanBuilder;
-import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
-import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.Optional;
@@ -22,7 +18,6 @@ import java.util.function.Supplier;
 
 import static com.example.okquerydsl.entity.QMember.*;
 import static com.example.okquerydsl.entity.QTeam.*;
-import static org.springframework.util.StringUtils.*;
 import static org.springframework.util.StringUtils.hasText;
 
 @Repository
