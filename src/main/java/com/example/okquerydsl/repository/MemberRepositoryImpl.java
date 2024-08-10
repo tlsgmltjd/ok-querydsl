@@ -2,14 +2,17 @@ package com.example.okquerydsl.repository;
 
 import com.example.okquerydsl.dto.MemberSearchCondition;
 import com.example.okquerydsl.dto.MemberTeamDto;
+import com.example.okquerydsl.entity.Member;
 import com.querydsl.core.QueryResults;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.support.PageableExecutionUtils;
 
 import java.util.List;
 
@@ -99,8 +102,8 @@ public class MemberRepositoryImpl implements MemberCustomRepository {
                 .limit(pageable.getPageSize())
                 .fetch();
 
-        long total = queryFactory
-                .select(member)
+        JPAQuery<Long> countQuery = queryFactory
+                .select(member.count())
                 .from(member)
                 .leftJoin(member.team, team)
                 .where(
@@ -108,10 +111,11 @@ public class MemberRepositoryImpl implements MemberCustomRepository {
                         teamNameEq(condition.getTeamName()),
                         ageGoe(condition.getAgeGoe()),
                         ageLoe(condition.getAgeLoe())
-                )
-                .fetchCount();
+                );
 
-        return new PageImpl<>(content, pageable, total);
+//        return new PageImpl<>(content, pageable, total);
+        // PageableExecutionUtils.getPage 를 사용해서 count query 함수를 넘기면 count 쿼리를 하지 않아도 되는 상황일 때는 count query를 날리지 않음
+        return PageableExecutionUtils.getPage(content, pageable, () -> countQuery.fetchFirst());
     }
 
     private BooleanExpression usernameEq(String username) {
